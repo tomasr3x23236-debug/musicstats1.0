@@ -4,715 +4,345 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MusicStats — Compartir</title>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Google AdSense: reemplaza ca-pub-XXXXXXXXXXXXXXXX con tu Publisher ID real -->
+  <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --pink: #FC3C44;
-      --pink2: #FF375F;
-      --dark: #111111;
-      --card: #1e1e1e;
-      --border: rgba(255,255,255,0.08);
-      --text1: #ffffff;
-      --text2: rgba(255,255,255,0.55);
-      --text3: rgba(255,255,255,0.3);
-      --surface: #2a2a2a;
-      --green: #30D158;
+      --pink: #FC3C44; --dark: #0a0a0a; --card: #141414; --card2: #1c1c1c;
+      --border: rgba(255,255,255,0.07); --text1: #fff; --text2: rgba(255,255,255,0.5);
+      --text3: rgba(255,255,255,0.22); --surface: #1e1e1e;
     }
-    html, body { height: 100%; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-      background: var(--dark); color: var(--text1);
-      -webkit-font-smoothing: antialiased;
-    }
-    .app { max-width: 960px; margin: 0 auto; padding: 24px 20px 60px; }
-
-    /* Header */
-    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
-    .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-    .logo-mark { width: 40px; height: 40px; background: var(--pink); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-    .logo-mark svg { width: 22px; height: 22px; fill: #fff; }
-    .logo-name { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; color: var(--text1); }
-    .logo-tagline { font-size: 11px; color: var(--text3); letter-spacing: 0.6px; text-transform: uppercase; }
-    .back-btn {
-      display: flex; align-items: center; gap: 6px;
-      color: var(--pink); font-size: 14px; font-weight: 500;
-      text-decoration: none; transition: opacity 0.15s;
-    }
-    .back-btn:hover { opacity: 0.7; }
-    .back-btn svg { width: 18px; height: 18px; fill: var(--pink); }
-
-    /* Page title */
-    .page-title { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 6px; }
-    .page-sub { font-size: 14px; color: var(--text2); margin-bottom: 32px; }
-
-    /* Card type selector */
-    .type-tabs { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
-    .type-tab {
-      padding: 8px 18px; border-radius: 50px; font-size: 13px; font-weight: 500;
-      cursor: pointer; border: 0.5px solid var(--border); background: var(--card);
-      color: var(--text2); transition: all 0.18s; font-family: inherit;
-    }
-    .type-tab.active { background: var(--pink); border-color: var(--pink); color: #fff; }
-
-    /* Layout */
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
-
-    /* Canvas preview */
-    .preview-wrap {
-      background: var(--card); border: 0.5px solid var(--border);
-      border-radius: 16px; padding: 20px; position: sticky; top: 20px;
-    }
-    .preview-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.9px; margin-bottom: 14px; }
-    .canvas-container {
-      width: 100%; aspect-ratio: 9/16; border-radius: 12px; overflow: hidden;
-      background: #000; position: relative;
-    }
-    canvas { width: 100%; height: 100%; display: block; }
-
+    html,body{min-height:100%;}
+    body{font-family:'Inter',-apple-system,sans-serif;background:var(--dark);color:var(--text1);-webkit-font-smoothing:antialiased;}
+    .app{max-width:1020px;margin:0 auto;padding:24px 20px 60px;}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .logo-mark{width:36px;height:36px;background:var(--pink);border-radius:9px;display:flex;align-items:center;justify-content:center;}
+    .logo-mark svg{width:20px;height:20px;fill:#fff;}
+    .logo-name{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;color:var(--text1);}
+    .back{color:var(--text2);font-size:13px;text-decoration:none;transition:color .15s;}
+    .back:hover{color:var(--text1);}
+    /* Ad slots */
+    .ad{background:var(--card);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+    .ad-top{min-height:90px;margin-bottom:24px;}
+    .ad-mid{min-height:260px;width:100%;}
+    .ad-bot{min-height:90px;margin-top:24px;}
+    .ad-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+    /* Page */
+    .page-title{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:900;letter-spacing:-0.8px;margin-bottom:4px;}
+    .page-sub{font-size:13px;color:var(--text2);margin-bottom:24px;}
+    .type-row{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;}
+    .type-btn{padding:7px 16px;border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;border:0.5px solid var(--border);background:var(--card);color:var(--text2);transition:all .15s;font-family:'Inter',sans-serif;}
+    .type-btn.active{background:#fff;border-color:#fff;color:#000;}
+    .type-btn:hover:not(.active){color:var(--text1);border-color:rgba(255,255,255,.2);}
+    /* Grid */
+    .grid{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;}
+    /* Preview */
+    .preview{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:14px;position:sticky;top:16px;}
+    .preview-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600;}
+    .canvas-wrap{width:100%;aspect-ratio:9/16;border-radius:10px;overflow:hidden;background:#000;}
+    canvas{width:100%;height:100%;display:block;}
     /* Controls */
-    .controls { display: flex; flex-direction: column; gap: 16px; }
-    .control-card {
-      background: var(--card); border: 0.5px solid var(--border);
-      border-radius: 14px; padding: 18px;
-    }
-    .control-title { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.9px; margin-bottom: 14px; }
-
-    /* Style swatches */
-    .style-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .style-swatch {
-      aspect-ratio: 9/16; border-radius: 8px; cursor: pointer;
-      border: 2px solid transparent; transition: all 0.15s;
-      position: relative; overflow: hidden;
-    }
-    .style-swatch.active { border-color: var(--pink); }
-    .style-swatch span {
-      position: absolute; bottom: 6px; left: 0; right: 0;
-      text-align: center; font-size: 10px; font-weight: 600; color: #fff;
-    }
-    .swatch-dark { background: linear-gradient(160deg, #1a1a2e, #16213e, #0f3460); }
-    .swatch-blur { background: linear-gradient(160deg, #2d1b33, #1a0a2e, #16213e); }
-    .swatch-minimal { background: linear-gradient(160deg, #0d0d0d, #1a1a1a); }
-
-    /* Username input */
-    .input-field {
-      width: 100%; background: var(--surface); border: 0.5px solid var(--border);
-      border-radius: 10px; padding: 10px 14px; color: var(--text1);
-      font-size: 13px; outline: none; transition: border-color 0.15s; font-family: inherit;
-    }
-    .input-field:focus { border-color: rgba(252,60,68,0.4); }
-    .input-field::placeholder { color: var(--text3); }
-    .input-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; }
-
-    /* Download button */
-    .btn-download {
-      width: 100%; padding: 14px; background: var(--pink); color: #fff;
-      border: none; border-radius: 12px; font-size: 15px; font-weight: 700;
-      cursor: pointer; font-family: inherit; transition: all 0.2s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      box-shadow: 0 8px 24px rgba(252,60,68,0.35);
-    }
-    .btn-download:hover { background: #FF6B73; transform: translateY(-1px); }
-    .btn-download svg { width: 18px; height: 18px; fill: #fff; }
-
-    /* Share options */
-    .share-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-    .btn-share {
-      padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 600;
-      cursor: pointer; font-family: inherit; transition: all 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 6px; border: none;
-    }
-    .btn-instagram { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); color: #fff; }
-    .btn-copy { background: var(--surface); color: var(--text2); border: 0.5px solid var(--border); }
-    .btn-copy:hover { color: var(--text1); }
-
+    .controls{display:flex;flex-direction:column;gap:12px;}
+    .ctrl{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:14px;}
+    .ctrl-title{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+    /* Palettes */
+    .palettes{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+    .pal{aspect-ratio:9/16;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all .15s;position:relative;overflow:hidden;}
+    .pal.active{border-color:#fff;}
+    .pal span{position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.85);padding:4px 2px;background:linear-gradient(transparent,rgba(0,0,0,.6));}
+    .p-noir{background:linear-gradient(160deg,#080808,#111,#0d0d0d);}
+    .p-rose{background:linear-gradient(160deg,#0e0008,#1a0510,#120008);}
+    .p-slate{background:linear-gradient(160deg,#060a10,#0b1220,#080e18);}
+    .p-sage{background:linear-gradient(160deg,#040a06,#081408,#060e06);}
+    /* Input */
+    .ctrl-input{width:100%;background:var(--surface);border:0.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text1);font-size:13px;outline:none;transition:border-color .15s;font-family:'Inter',sans-serif;}
+    .ctrl-input:focus{border-color:rgba(255,255,255,.25);}
+    .ctrl-input::placeholder{color:var(--text3);}
+    /* Period */
+    .period-row{display:flex;gap:5px;}
+    .period-btn{flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:0.5px solid var(--border);background:var(--surface);color:var(--text2);transition:all .15s;font-family:'Inter',sans-serif;text-align:center;}
+    .period-btn.active{background:var(--card2);border-color:rgba(255,255,255,.2);color:var(--text1);}
+    /* Buttons */
+    .btn-dl{width:100%;padding:13px;background:#fff;color:#000;border:none;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Unbounded',sans-serif;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:7px;letter-spacing:-.3px;}
+    .btn-dl:hover{background:#ddd;transform:translateY(-1px);}
+    .btn-dl svg{width:15px;height:15px;fill:#000;}
+    .share-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+    .btn-ig{padding:10px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'Inter',sans-serif;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;display:flex;align-items:center;justify-content:center;gap:5px;transition:opacity .15s;}
+    .btn-ig:hover{opacity:.8;}
+    .btn-cp{padding:10px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;border:0.5px solid var(--border);background:var(--surface);color:var(--text2);font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s;}
+    .btn-cp:hover{color:var(--text1);}
+    .ig-note{font-size:11px;color:var(--text3);line-height:1.7;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:8px;border:0.5px solid var(--border);}
     /* Toast */
-    .toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
-      background: var(--green); color: #fff; padding: 12px 24px; border-radius: 50px;
-      font-size: 14px; font-weight: 600; transition: transform 0.3s ease;
-      pointer-events: none; z-index: 100;
-    }
-    .toast.show { transform: translateX(-50%) translateY(0); }
-
-    /* Instagram tip */
-    .ig-tip {
-      background: rgba(131,58,180,0.1); border: 0.5px solid rgba(131,58,180,0.3);
-      border-radius: 10px; padding: 12px 14px; font-size: 12px; color: rgba(200,150,255,0.9);
-      line-height: 1.6; margin-top: 8px;
-    }
-
-    @media (max-width: 640px) {
-      .two-col { grid-template-columns: 1fr; }
-      .preview-wrap { position: static; }
-    }
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#fff;color:#000;padding:11px 22px;border-radius:50px;font-size:13px;font-weight:700;transition:transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:999;font-family:'Inter',sans-serif;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+    @media(max-width:680px){.grid{grid-template-columns:1fr;}.preview{position:static;}}
   </style>
 </head>
 <body>
 <div class="app">
   <header>
     <a href="/" class="logo">
-      <div class="logo-mark">
-        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-      </div>
-      <div>
-        <div class="logo-name">MusicStats</div>
-        <div class="logo-tagline">Apple Music Tracker</div>
-      </div>
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></div>
+      <div class="logo-name">MusicStats</div>
     </a>
-    <a href="/" class="back-btn">
-      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-      Volver
-    </a>
+    <a href="/" class="back">← Volver</a>
   </header>
 
-  <div class="page-title">Compartir estadísticas</div>
-  <div class="page-sub">Genera tarjetas para tus historias de Instagram</div>
-
-  <!-- Card type tabs -->
-  <div class="type-tabs">
-    <button class="type-tab active" onclick="setCardType('artistas')">🎤 Top Artistas</button>
-    <button class="type-tab" onclick="setCardType('canciones')">🎵 Top Canciones</button>
-    <button class="type-tab" onclick="setCardType('minutos')">⏱ Mis Minutos</button>
-    <button class="type-tab" onclick="setCardType('resumen')">✨ Resumen Total</button>
+  <!-- Ad Top (728×90) -->
+  <div class="ad ad-top">
+    <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script> -->
+    <div class="ad-label">Publicidad · Google AdSense</div>
   </div>
 
-  <div class="two-col">
-    <!-- Canvas preview -->
-    <div class="preview-wrap">
-      <div class="preview-label">Vista previa (9:16)</div>
-      <div class="canvas-container">
-        <canvas id="shareCanvas" width="1080" height="1920"></canvas>
-      </div>
+  <div class="page-title">Crea tu tarjeta</div>
+  <div class="page-sub">Diseños minimalistas listos para tus historias</div>
+
+  <div class="type-row">
+    <button class="type-btn active" onclick="setType('artistas',this)">Top Artistas</button>
+    <button class="type-btn" onclick="setType('canciones',this)">Top Canciones</button>
+    <button class="type-btn" onclick="setType('minutos',this)">Mis Minutos</button>
+    <button class="type-btn" onclick="setType('resumen',this)">Resumen</button>
+  </div>
+
+  <div class="grid">
+    <div class="preview">
+      <div class="preview-label">Vista previa · 9:16</div>
+      <div class="canvas-wrap"><canvas id="C" width="1080" height="1920"></canvas></div>
     </div>
 
-    <!-- Controls -->
     <div class="controls">
-      <!-- Style -->
-      <div class="control-card">
-        <div class="control-title">Estilo</div>
-        <div class="style-grid">
-          <div class="style-swatch swatch-dark active" onclick="setStyle('dark')" title="Noche profunda">
-            <span>Noche</span>
-          </div>
-          <div class="style-swatch swatch-blur" onclick="setStyle('purple')" title="Púrpura">
-            <span>Púrpura</span>
-          </div>
-          <div class="style-swatch swatch-minimal" onclick="setStyle('minimal')" title="Minimal">
-            <span>Minimal</span>
-          </div>
+      <div class="ctrl">
+        <div class="ctrl-title">Paleta</div>
+        <div class="palettes">
+          <div class="pal p-noir active" onclick="setPalette('noir',this)"><span>NOIR</span></div>
+          <div class="pal p-rose" onclick="setPalette('rose',this)"><span>ROSE</span></div>
+          <div class="pal p-slate" onclick="setPalette('slate',this)"><span>SLATE</span></div>
+          <div class="pal p-sage" onclick="setPalette('sage',this)"><span>SAGE</span></div>
         </div>
       </div>
 
-      <!-- Username -->
-      <div class="control-card">
-        <div class="control-title">Tu nombre</div>
-        <label class="input-label">Aparecerá en la tarjeta</label>
-        <input type="text" class="input-field" id="usernameInput" placeholder="@tuusuario" maxlength="30" oninput="renderCard()" />
+      <div class="ctrl">
+        <div class="ctrl-title">Tu handle</div>
+        <input class="ctrl-input" id="handleInput" placeholder="@tuusuario" maxlength="24" oninput="render()"/>
       </div>
 
-      <!-- Period -->
-      <div class="control-card">
-        <div class="control-title">Período</div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="type-tab active" style="font-size:12px; padding:6px 14px;" onclick="setPeriod('alltime', this)">Todo el tiempo</button>
-          <button class="type-tab" style="font-size:12px; padding:6px 14px;" onclick="setPeriod('month', this)">Este mes</button>
-          <button class="type-tab" style="font-size:12px; padding:6px 14px;" onclick="setPeriod('week', this)">Esta semana</button>
+      <div class="ctrl">
+        <div class="ctrl-title">Período</div>
+        <div class="period-row">
+          <button class="period-btn active" onclick="setPeriod('alltime',this)">Siempre</button>
+          <button class="period-btn" onclick="setPeriod('month',this)">Este mes</button>
+          <button class="period-btn" onclick="setPeriod('week',this)">Esta semana</button>
         </div>
       </div>
 
-      <!-- Download -->
-      <button class="btn-download" onclick="downloadCard()">
+      <!-- Ad mid (300×250) -->
+      <div class="ad ad-mid">
+        <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="rectangle"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script> -->
+        <div class="ad-label">Publicidad</div>
+      </div>
+
+      <button class="btn-dl" onclick="download()">
         <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-        Descargar imagen
+        Descargar historia
       </button>
 
-      <!-- Share options -->
-      <div class="share-options">
-        <button class="btn-share btn-instagram" onclick="shareInstagram()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      <div class="share-row">
+        <button class="btn-ig" onclick="openIG()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
           Abrir Instagram
         </button>
-        <button class="btn-share btn-copy" onclick="copyImage()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-          Copiar imagen
+        <button class="btn-cp" onclick="copyImg()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          Copiar
         </button>
       </div>
 
-      <div class="ig-tip">
-        📱 <strong>Para Instagram:</strong> Descarga la imagen → abre Instagram → Nueva historia → selecciona la imagen desde tu galería. En iOS también puedes mantener presionada la imagen y elegir "Compartir".
-      </div>
+      <div class="ig-note">📱 Descarga → abre Instagram → Nueva historia → elige la imagen de tu galería</div>
     </div>
   </div>
-</div>
 
-<div class="toast" id="toast">✓ ¡Imagen descargada!</div>
+  <!-- Ad Bottom -->
+  <div class="ad ad-bot">
+    <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script> -->
+    <div class="ad-label">Publicidad · Google AdSense</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ── Estado ──
-const STATE_KEY = 'ms_state';
-let state = null;
-let cardType = 'artistas';
-let cardStyle = 'dark';
-let period = 'alltime';
-
-const STYLES = {
-  dark: {
-    bg1: '#0d0d1a', bg2: '#1a1a2e', bg3: '#16213e',
-    accent: '#FC3C44', accent2: '#FF375F',
-    text1: '#ffffff', text2: 'rgba(255,255,255,0.6)', text3: 'rgba(255,255,255,0.3)',
-    bar: 'rgba(252,60,68,0.8)', barBg: 'rgba(255,255,255,0.08)',
-    logo: '#FC3C44'
-  },
-  purple: {
-    bg1: '#0d0014', bg2: '#1a0a2e', bg3: '#2d1b33',
-    accent: '#BF5AF2', accent2: '#9b59b6',
-    text1: '#ffffff', text2: 'rgba(255,255,255,0.6)', text3: 'rgba(255,255,255,0.3)',
-    bar: 'rgba(191,90,242,0.85)', barBg: 'rgba(255,255,255,0.08)',
-    logo: '#BF5AF2'
-  },
-  minimal: {
-    bg1: '#080808', bg2: '#111111', bg3: '#181818',
-    accent: '#FC3C44', accent2: '#FF375F',
-    text1: '#ffffff', text2: 'rgba(255,255,255,0.5)', text3: 'rgba(255,255,255,0.25)',
-    bar: 'rgba(252,60,68,0.9)', barBg: 'rgba(255,255,255,0.06)',
-    logo: '#FC3C44'
-  }
+'use strict';
+const PALS={
+  noir:{bg:['#080808','#111','#0d0d0d'],acc:'#FC3C44',accRGB:'252,60,68',txt:'#fff',sub:'rgba(255,255,255,.45)',muted:'rgba(255,255,255,.18)'},
+  rose:{bg:['#0e0008','#1a0510','#120008'],acc:'#FF6B9D',accRGB:'255,107,157',txt:'#fff',sub:'rgba(255,255,255,.45)',muted:'rgba(255,255,255,.18)'},
+  slate:{bg:['#060a10','#0b1220','#080e18'],acc:'#64D2FF',accRGB:'100,210,255',txt:'#fff',sub:'rgba(255,255,255,.45)',muted:'rgba(255,255,255,.18)'},
+  sage:{bg:['#040a06','#081408','#060e06'],acc:'#30D158',accRGB:'48,209,88',txt:'#fff',sub:'rgba(255,255,255,.45)',muted:'rgba(255,255,255,.18)'},
 };
+const PERIODS={alltime:'All time',month:'This month',week:'This week'};
+const W=1080,H=1920,PAD=88;
+let cardType='artistas',palKey='noir',period='alltime',state=null;
+const C=document.getElementById('C'),ctx=C.getContext('2d');
 
-const PERIOD_LABELS = { alltime: 'Todo el tiempo', month: 'Este mes', week: 'Esta semana' };
+function loadState(){try{const s=localStorage.getItem('ms_state');return s?JSON.parse(s):null;}catch{return null;}}
+function demo(){return{userName:'',totalMins:18432,totalPlays:3369,streak:47,artists:[{name:'Bad Bunny',plays:847,mins:2541},{name:'Taylor Swift',plays:623,mins:1869},{name:'Drake',plays:511,mins:1533},{name:'The Weeknd',plays:489,mins:1467},{name:'Peso Pluma',plays:334,mins:1002}],songs:[{title:'Tití Me Preguntó',artist:'Bad Bunny',plays:142},{title:'Cruel Summer',artist:'Taylor Swift',plays:118},{title:'One Dance',artist:'Drake',plays:97},{title:'Blinding Lights',artist:'The Weeknd',plays:89},{title:'LADY GAGA',artist:'Peso Pluma',plays:78}]};}
 
-// ── Load state ──
-function loadState() {
-  try { const s = localStorage.getItem(STATE_KEY); return s ? JSON.parse(s) : null; } catch { return null; }
+function rrect(x,y,w,h,r,fill,strokeColor){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(strokeColor){ctx.strokeStyle=strokeColor;ctx.lineWidth=1;ctx.stroke();}
 }
+function f(sz,wt){ctx.font=`${wt} ${sz}px 'Helvetica Neue',Helvetica,Arial,sans-serif`;}
+function t(s,x,y,mw){if(mw)ctx.fillText(String(s),x,y,mw);else ctx.fillText(String(s),x,y);}
+function rt(s,x,y){ctx.save();ctx.textAlign='right';t(s,x,y);ctx.restore();}
+function ct(s,x,y){ctx.save();ctx.textAlign='center';t(s,x,y);ctx.restore();}
 
-function getDemoState() {
-  return {
-    userName: 'Demo',
-    totalMins: 18432, totalPlays: 3369, streak: 47,
-    artists: [
-      { name: 'Bad Bunny', plays: 847, mins: 2541 },
-      { name: 'Taylor Swift', plays: 623, mins: 1869 },
-      { name: 'Drake', plays: 511, mins: 1533 },
-      { name: 'The Weeknd', plays: 489, mins: 1467 },
-      { name: 'Peso Pluma', plays: 334, mins: 1002 },
-    ],
-    songs: [
-      { title: 'Tití Me Preguntó', artist: 'Bad Bunny', plays: 142, emoji: '🌶️' },
-      { title: 'Cruel Summer', artist: 'Taylor Swift', plays: 118, emoji: '☀️' },
-      { title: 'One Dance', artist: 'Drake', plays: 97, emoji: '💃' },
-      { title: 'Blinding Lights', artist: 'The Weeknd', plays: 89, emoji: '⚡' },
-      { title: 'LADY GAGA', artist: 'Peso Pluma', plays: 78, emoji: '🔥' },
-    ]
-  };
-}
-
-// ── Canvas rendering ──
-function renderCard() {
-  const canvas = document.getElementById('shareCanvas');
-  const ctx = canvas.getContext('2d');
-  const W = 1080, H = 1920;
-  const s = STYLES[cardStyle];
-  const username = document.getElementById('usernameInput').value.trim() || (state?.userName) || 'MusicStats';
-
-  // Background gradient
-  const grad = ctx.createLinearGradient(0, 0, W * 0.6, H);
-  grad.addColorStop(0, s.bg1);
-  grad.addColorStop(0.5, s.bg2);
-  grad.addColorStop(1, s.bg3);
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, W, H);
-
-  // Decorative circles
-  drawCircle(ctx, W * 0.85, H * 0.12, 280, s.accent, 0.07);
-  drawCircle(ctx, W * 0.1, H * 0.85, 200, s.accent2, 0.05);
-  drawCircle(ctx, W * 0.5, H * 0.5, 400, s.accent, 0.03);
-
-  // Logo area
-  drawLogo(ctx, 72, 90, s);
-
-  // Username + period
-  ctx.font = '700 44px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.text2;
-  ctx.fillText('@' + username, 72, 230);
-
-  ctx.font = '500 38px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.text3;
-  ctx.fillText(PERIOD_LABELS[period], 72, 285);
-
-  // Divider
-  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(72, 320); ctx.lineTo(W - 72, 320); ctx.stroke();
-
-  // Content
-  if (cardType === 'artistas') drawArtists(ctx, s, W, H);
-  else if (cardType === 'canciones') drawSongs(ctx, s, W, H);
-  else if (cardType === 'minutos') drawMinutos(ctx, s, W, H);
-  else drawResumen(ctx, s, W, H);
-
-  // Bottom watermark
-  ctx.font = '500 36px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.text3;
-  ctx.textAlign = 'center';
-  ctx.fillText('musicstats-gzwm.vercel.app', W / 2, H - 80);
-  ctx.textAlign = 'left';
-}
-
-function drawCircle(ctx, x, y, r, color, alpha) {
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.fillStyle = color;
-  ctx.fill();
+function bg(p){
+  const g=ctx.createLinearGradient(0,0,W*.5,H);
+  g.addColorStop(0,p.bg[0]);g.addColorStop(.55,p.bg[1]);g.addColorStop(1,p.bg[2]);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // noise
+  ctx.save();ctx.globalAlpha=.022;
+  for(let i=0;i<2500;i++){ctx.fillStyle='#fff';ctx.fillRect(Math.random()*W,Math.random()*H,1,1);}
   ctx.restore();
+  // glows
+  glow(W*.82,H*.08,480,p.acc,.13);
+  glow(W*.12,H*.78,340,p.acc,.07);
+  glow(W*.45,H*.48,560,p.acc,.03);
+}
+function glow(x,y,r,col,a){
+  ctx.save();const rg=ctx.createRadialGradient(x,y,0,x,y,r);
+  const hex=Math.round(a*255).toString(16).padStart(2,'0');
+  rg.addColorStop(0,col+hex);rg.addColorStop(1,col+'00');
+  ctx.fillStyle=rg;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.restore();
+}
+function header(p,handle,per){
+  // logo pill
+  rrect(PAD,76,196,52,26,`rgba(${p.accRGB},.1)`,`rgba(${p.accRGB},.25)`);
+  ctx.fillStyle=p.acc;f(22,'700');t('MusicStats',PAD+18,113);
+  // handle
+  ctx.fillStyle=p.txt;f(60,'300');t(handle?'@'+handle:'@musicstats',PAD,214);
+  // period tag
+  rrect(PAD,234,230,46,23,`rgba(${p.accRGB},.12)`);
+  ctx.fillStyle=p.acc;f(27,'600');t(per,PAD+18,268);
+  // line
+  ctx.save();ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(PAD,306);ctx.lineTo(W-PAD,306);ctx.stroke();ctx.restore();
+}
+function footer(p){
+  ctx.fillStyle='rgba(255,255,255,.2)';f(28,'400');ct('musicstats-gzwm.vercel.app',W/2,H-68);
 }
 
-function drawLogo(ctx, x, y, s) {
-  // Logo pill background
-  roundRect(ctx, x, y, 220, 72, 16, s.logo + '22');
-  ctx.strokeStyle = s.logo + '44';
-  ctx.lineWidth = 1;
-  roundRect(ctx, x, y, 220, 72, 16, null, true);
-
-  // Music note icon (simplified)
-  ctx.fillStyle = s.accent;
-  ctx.font = '700 28px -apple-system';
-  ctx.fillText('♪', x + 20, y + 48);
-
-  ctx.fillStyle = s.text1;
-  ctx.font = '700 30px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillText('MusicStats', x + 56, y + 48);
-}
-
-function drawArtists(ctx, s, W, H) {
-  const artists = [...(state?.artists || [])].sort((a,b) => b.plays - a.plays).slice(0, 5);
-  const max = artists[0]?.plays || 1;
-
-  ctx.font = '800 80px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.text1;
-  ctx.fillText('Top Artistas', 72, 440);
-
-  ctx.font = '500 40px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.accent;
-  ctx.fillText('🎤 Mis favoritos', 72, 500);
-
-  const startY = 580;
-  const rowH = 200;
-  const rankColors = [s.accent, '#C0C0C0', '#CD7F32', s.text2, s.text3];
-  const rankNums = ['①', '②', '③', '④', '⑤'];
-
-  artists.forEach((a, i) => {
-    const y = startY + i * rowH;
-    const barW = Math.round((a.plays / max) * (W - 200));
-
-    // Bar background
-    ctx.fillStyle = s.barBg;
-    roundRect(ctx, 72, y + 50, W - 144, 16, 8, s.barBg);
-
-    // Bar fill
-    const barGrad = ctx.createLinearGradient(72, 0, 72 + barW, 0);
-    barGrad.addColorStop(0, s.accent);
-    barGrad.addColorStop(1, s.accent2 + '88');
-    roundRect(ctx, 72, y + 50, barW, 16, 8, barGrad);
-
-    // Rank
-    ctx.font = `700 52px -apple-system`;
-    ctx.fillStyle = rankColors[i];
-    ctx.fillText(rankNums[i], 72, y + 40);
-
-    // Name
-    ctx.font = `700 52px -apple-system, BlinkMacSystemFont, Helvetica`;
-    ctx.fillStyle = s.text1;
-    const name = a.name.length > 18 ? a.name.substring(0, 18) + '…' : a.name;
-    ctx.fillText(name, 148, y + 40);
-
-    // Plays
-    ctx.font = `500 36px -apple-system`;
-    ctx.fillStyle = s.text2;
-    ctx.textAlign = 'right';
-    ctx.fillText(a.plays.toLocaleString() + ' plays', W - 72, y + 40);
-    ctx.textAlign = 'left';
+function drawArtistas(p,s){
+  const arts=[...s.artists].sort((a,b)=>b.plays-a.plays).slice(0,5);
+  const mx=arts[0]?.plays||1;
+  ctx.fillStyle=p.acc;f(28,'700');t('TOP ARTISTAS',PAD,376);
+  ctx.fillStyle=p.txt;f(114,'900');t('Mis',PAD,500);
+  ctx.fillStyle=p.acc;f(114,'900');t('favoritos',PAD,624);
+  rrect(PAD,662,64,5,2.5,p.acc);
+  arts.forEach((a,i)=>{
+    const y=748+i*212,bw=Math.max(50,Math.round((a.plays/mx)*(W-PAD*2-70)));
+    rrect(PAD-20,y-62,W-PAD*2+40,172,18,'rgba(255,255,255,.025)');
+    ctx.save();ctx.globalAlpha=.055;ctx.fillStyle=p.txt;f(210,'900');t(i+1,PAD-14,y+82);ctx.restore();
+    ctx.fillStyle=p.txt;f(i===0?66:56,i===0?'700':'500');
+    const nm=a.name.length>18?a.name.slice(0,18)+'…':a.name;t(nm,PAD+62,y+12);
+    ctx.fillStyle=p.acc;f(46,'800');rt(a.plays.toLocaleString(),W-PAD,y+12);
+    ctx.fillStyle=p.sub;f(27,'400');rt('plays',W-PAD,y+54);
+    rrect(PAD+62,y+32,W-PAD*2-62,6,3,'rgba(255,255,255,.08)');
+    const bg2=ctx.createLinearGradient(PAD+62,0,PAD+62+bw,0);bg2.addColorStop(0,p.acc);bg2.addColorStop(1,p.acc+'44');
+    rrect(PAD+62,y+32,bw,6,3,bg2);
   });
 }
-
-function drawSongs(ctx, s, W, H) {
-  const songs = [...(state?.songs || [])].sort((a,b) => b.plays - a.plays).slice(0, 5);
-  const max = songs[0]?.plays || 1;
-
-  ctx.font = '800 80px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.text1;
-  ctx.fillText('Top Canciones', 72, 440);
-
-  ctx.font = '500 40px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.accent;
-  ctx.fillText('🎵 Las que más sueno', 72, 500);
-
-  const startY = 580;
-  const rowH = 200;
-
-  songs.forEach((song, i) => {
-    const y = startY + i * rowH;
-    const title = (song.title || song.name || '');
-    const barW = Math.round((song.plays / max) * (W - 200));
-
-    // Emoji circle
-    ctx.font = '52px sans-serif';
-    ctx.fillText(song.emoji || '🎵', 72, y + 40);
-
-    // Title
-    ctx.font = `700 48px -apple-system, BlinkMacSystemFont, Helvetica`;
-    ctx.fillStyle = s.text1;
-    const shortTitle = title.length > 16 ? title.substring(0, 16) + '…' : title;
-    ctx.fillText(shortTitle, 148, y + 38);
-
-    // Artist
-    ctx.font = `500 36px -apple-system`;
-    ctx.fillStyle = s.text2;
-    ctx.fillText(song.artist || '', 148, y + 80);
-
-    // Bar
-    roundRect(ctx, 72, y + 104, W - 144, 12, 6, s.barBg);
-    const barGrad = ctx.createLinearGradient(72, 0, 72 + barW, 0);
-    barGrad.addColorStop(0, s.accent);
-    barGrad.addColorStop(1, s.accent2 + '88');
-    roundRect(ctx, 72, y + 104, barW, 12, 6, barGrad);
-
-    // Plays
-    ctx.font = `500 34px -apple-system`;
-    ctx.fillStyle = s.accent;
-    ctx.textAlign = 'right';
-    ctx.fillText(song.plays + '×', W - 72, y + 38);
-    ctx.textAlign = 'left';
+function drawCanciones(p,s){
+  const songs=[...s.songs].sort((a,b)=>b.plays-a.plays).slice(0,5);
+  const mx=songs[0]?.plays||1;
+  ctx.fillStyle=p.acc;f(28,'700');t('TOP CANCIONES',PAD,376);
+  ctx.fillStyle=p.txt;f(114,'900');t('En',PAD,500);
+  ctx.fillStyle=p.acc;f(114,'900');t('repeat',PAD,624);
+  rrect(PAD,662,64,5,2.5,p.acc);
+  songs.forEach((sg,i)=>{
+    const y=748+i*212,title=sg.title||sg.name||'',short=title.length>17?title.slice(0,17)+'…':title;
+    const bw=Math.max(50,Math.round((sg.plays/mx)*(W-PAD*2-62)));
+    rrect(PAD-20,y-62,W-PAD*2+40,172,18,'rgba(255,255,255,.025)');
+    ctx.save();ctx.globalAlpha=.055;ctx.fillStyle=p.txt;f(210,'900');t(i+1,PAD-14,y+82);ctx.restore();
+    ctx.fillStyle=p.txt;f(i===0?62:52,i===0?'700':'500');t(short,PAD+62,y+10);
+    ctx.fillStyle=p.sub;f(32,'400');t(sg.artist||'',PAD+62,y+54);
+    ctx.fillStyle=p.acc;f(44,'800');rt(sg.plays+'×',W-PAD,y+10);
+    rrect(PAD+62,y+72,W-PAD*2-62,5,2.5,'rgba(255,255,255,.08)');
+    const bg2=ctx.createLinearGradient(PAD+62,0,PAD+62+bw,0);bg2.addColorStop(0,p.acc);bg2.addColorStop(1,p.acc+'44');
+    rrect(PAD+62,y+72,bw,5,2.5,bg2);
   });
 }
-
-function drawMinutos(ctx, s, W, H) {
-  const mins = state?.totalMins || 18432;
-  const hrs = Math.floor(mins / 60);
-  const plays = state?.totalPlays || 3369;
-  const streak = state?.streak || 47;
-  const songs = state?.songs?.length || 7;
-
-  ctx.font = '800 80px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.text1;
-  ctx.fillText('Mis Minutos', 72, 440);
-
-  ctx.font = '500 40px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.accent;
-  ctx.fillText('⏱ En números', 72, 500);
-
-  // Big number
-  ctx.font = '800 180px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.accent;
-  ctx.textAlign = 'center';
-  ctx.fillText(mins.toLocaleString(), W / 2, 780);
-  ctx.font = '600 56px -apple-system';
-  ctx.fillStyle = s.text2;
-  ctx.fillText('minutos escuchados', W / 2, 850);
-
-  // Hours
-  ctx.font = '700 100px -apple-system';
-  ctx.fillStyle = s.text1;
-  ctx.fillText(hrs.toLocaleString(), W / 2, 1000);
-  ctx.font = '500 44px -apple-system';
-  ctx.fillStyle = s.text2;
-  ctx.fillText('horas en total', W / 2, 1060);
-
-  ctx.textAlign = 'left';
-
-  // Stats grid
-  const stats = [
-    { label: 'Reproducciones', value: plays.toLocaleString(), icon: '🎵' },
-    { label: 'Racha actual', value: streak + ' días', icon: '🔥' },
-    { label: 'Canciones únicas', value: songs, icon: '🎶' },
-    { label: 'Promedio/día', value: Math.round(mins / 30) + ' min', icon: '📅' },
-  ];
-
-  const cardW = (W - 144 - 24) / 2;
-  stats.forEach((st, i) => {
-    const col = i % 2;
-    const row = Math.floor(i / 2);
-    const cx = 72 + col * (cardW + 24);
-    const cy = 1150 + row * 220;
-
-    roundRect(ctx, cx, cy, cardW, 190, 20, 'rgba(255,255,255,0.05)');
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1;
-    roundRect(ctx, cx, cy, cardW, 190, 20, null, true);
-
-    ctx.font = '44px sans-serif';
-    ctx.fillText(st.icon, cx + 20, cy + 58);
-
-    ctx.font = '700 52px -apple-system, BlinkMacSystemFont, Helvetica';
-    ctx.fillStyle = s.text1;
-    ctx.fillText(st.value, cx + 20, cy + 125);
-
-    ctx.font = '500 32px -apple-system';
-    ctx.fillStyle = s.text2;
-    ctx.fillText(st.label, cx + 20, cy + 168);
+function drawMinutos(p,s){
+  const mins=s.totalMins||0,hrs=Math.floor(mins/60);
+  ctx.fillStyle=p.acc;f(28,'700');t('TIEMPO ESCUCHADO',PAD,376);
+  ctx.fillStyle=p.txt;f(114,'900');t('Mis',PAD,500);ctx.fillStyle=p.acc;f(114,'900');t('números',PAD,624);
+  rrect(PAD,662,64,5,2.5,p.acc);
+  ctx.fillStyle=p.acc;f(188,'900');ct(mins.toLocaleString(),W/2,910);
+  ctx.fillStyle=p.sub;f(46,'300');ct('minutos',W/2,980);
+  ctx.fillStyle=`rgba(${p.accRGB},.3)`;f(50,'400');ct('· · ·',W/2,1060);
+  ctx.fillStyle=p.txt;f(150,'900');ct(hrs.toLocaleString(),W/2,1220);
+  ctx.fillStyle=p.sub;f(44,'300');ct('horas en total',W/2,1286);
+  const stats=[{l:'Reproducciones',v:(s.totalPlays||0).toLocaleString()},{l:'Días de racha 🔥',v:(s.streak||0)+''},{l:'Canciones únicas',v:(s.songs?.length||0)+''},{l:'Promedio / día',v:Math.round(mins/30)+' min'}];
+  const cW=(W-PAD*2-24)/2;
+  stats.forEach((st,i)=>{
+    const col=i%2,row=Math.floor(i/2),cx=PAD+col*(cW+24),cy=1350+row*230;
+    rrect(cx,cy,cW,200,20,'rgba(255,255,255,.04)',`rgba(${p.accRGB},.12)`);
+    ctx.fillStyle=p.acc;f(70,'900');t(st.v,cx+22,cy+90);
+    ctx.fillStyle=p.sub;f(28,'400');t(st.l,cx+22,cy+140);
   });
 }
-
-function drawResumen(ctx, s, W, H) {
-  const mins = state?.totalMins || 18432;
-  const hrs = Math.floor(mins / 60);
-  const topArtist = [...(state?.artists || [])].sort((a,b) => b.plays - a.plays)[0];
-  const topSong = [...(state?.songs || [])].sort((a,b) => b.plays - a.plays)[0];
-
-  ctx.font = '800 80px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.text1;
-  ctx.fillText('Mi Resumen', 72, 440);
-
-  ctx.font = '500 40px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.accent;
-  ctx.fillText('✨ MusicStats ' + new Date().getFullYear(), 72, 500);
-
-  // Minutes big
-  ctx.font = '800 160px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.accent;
-  ctx.textAlign = 'center';
-  ctx.fillText(mins.toLocaleString(), W / 2, 730);
-  ctx.font = '600 50px -apple-system';
-  ctx.fillStyle = s.text2;
-  ctx.fillText('minutos · ' + hrs + ' horas', W / 2, 800);
-  ctx.textAlign = 'left';
-
-  // Top artist
-  roundRect(ctx, 72, 880, W - 144, 200, 24, 'rgba(255,255,255,0.05)');
-  ctx.strokeStyle = s.accent + '33';
-  ctx.lineWidth = 1.5;
-  roundRect(ctx, 72, 880, W - 144, 200, 24, null, true);
-  ctx.font = '500 36px -apple-system';
-  ctx.fillStyle = s.text2;
-  ctx.fillText('🎤  Artista #1', 108, 940);
-  ctx.font = '700 62px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.text1;
-  ctx.fillText(topArtist?.name || 'Bad Bunny', 108, 1020);
-  ctx.font = '500 36px -apple-system';
-  ctx.fillStyle = s.accent;
-  ctx.textAlign = 'right';
-  ctx.fillText((topArtist?.plays || 847) + ' plays', W - 108, 1020);
-  ctx.textAlign = 'left';
-
-  // Top song
-  roundRect(ctx, 72, 1110, W - 144, 200, 24, 'rgba(255,255,255,0.05)');
-  ctx.strokeStyle = s.accent + '33';
-  roundRect(ctx, 72, 1110, W - 144, 200, 24, null, true);
-  ctx.font = '500 36px -apple-system';
-  ctx.fillStyle = s.text2;
-  ctx.fillText('🎵  Canción #1', 108, 1170);
-  ctx.font = '700 62px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.text1;
-  const sTitle = (topSong?.title || topSong?.name || 'Tití Me Preguntó');
-  ctx.fillText(sTitle.length > 16 ? sTitle.substring(0, 16) + '…' : sTitle, 108, 1250);
-  ctx.font = '500 36px -apple-system';
-  ctx.fillStyle = s.text2;
-  ctx.fillText(topSong?.artist || 'Bad Bunny', 108, 1295);
-  ctx.fillStyle = s.accent;
-  ctx.textAlign = 'right';
-  ctx.fillText((topSong?.plays || 142) + '×', W - 108, 1250);
-  ctx.textAlign = 'left';
-
-  // Streak
-  roundRect(ctx, 72, 1340, W - 144, 160, 24, 'rgba(255,255,255,0.05)');
-  ctx.strokeStyle = s.accent + '33';
-  roundRect(ctx, 72, 1340, W - 144, 160, 24, null, true);
-  ctx.font = '700 70px sans-serif';
-  ctx.fillText('🔥', 108, 1450);
-  ctx.font = '700 60px -apple-system, BlinkMacSystemFont, Helvetica';
-  ctx.fillStyle = s.text1;
-  ctx.fillText((state?.streak || 47) + ' días de racha', 190, 1450);
+function drawResumen(p,s){
+  const mins=s.totalMins||0,hrs=Math.floor(mins/60);
+  const topA=[...s.artists].sort((a,b)=>b.plays-a.plays)[0]||{name:'—',plays:0};
+  const topS=[...s.songs].sort((a,b)=>b.plays-a.plays)[0]||{title:'—',plays:0,artist:''};
+  ctx.fillStyle=p.acc;f(28,'700');t('MI RESUMEN',PAD,376);
+  ctx.fillStyle=p.txt;f(114,'900');t('Stats que',PAD,500);ctx.fillStyle=p.acc;f(114,'900');t('importan',PAD,624);
+  rrect(PAD,662,64,5,2.5,p.acc);
+  rrect(PAD,716,W-PAD*2,248,24,'rgba(255,255,255,.04)',`rgba(${p.accRGB},.14)`);
+  ctx.fillStyle=p.sub;f(30,'600');t('TIEMPO TOTAL',PAD+36,780);
+  ctx.fillStyle=p.txt;f(110,'900');t(mins.toLocaleString()+' min',PAD+36,898);
+  ctx.fillStyle=p.sub;f(34,'400');t(hrs+' horas',PAD+36,944);
+  rrect(PAD,990,W-PAD*2,218,24,'rgba(255,255,255,.04)',`rgba(${p.accRGB},.14)`);
+  ctx.fillStyle=p.sub;f(28,'600');t('ARTISTA #1',PAD+36,1052);
+  const aN=topA.name.length>16?topA.name.slice(0,16)+'…':topA.name;
+  ctx.fillStyle=p.txt;f(82,'900');t(aN,PAD+36,1158);
+  ctx.fillStyle=p.acc;f(38,'700');rt(topA.plays.toLocaleString()+' plays',W-PAD-36,1158);
+  rrect(PAD,1236,W-PAD*2,218,24,'rgba(255,255,255,.04)',`rgba(${p.accRGB},.14)`);
+  ctx.fillStyle=p.sub;f(28,'600');t('CANCIÓN #1',PAD+36,1298);
+  const sN=(topS.title||'').length>16?(topS.title||'').slice(0,16)+'…':(topS.title||'');
+  ctx.fillStyle=p.txt;f(76,'900');t(sN,PAD+36,1398);
+  ctx.fillStyle=p.sub;f(32,'400');t(topS.artist||'',PAD+36,1444);
+  ctx.fillStyle=p.acc;f(38,'700');rt(topS.plays+'×',W-PAD-36,1398);
+  rrect(PAD,1484,W-PAD*2,166,24,`rgba(${p.accRGB},.09)`);
+  ctx.fillStyle=p.txt;f(76,'900');t('🔥 '+(s.streak||0)+' días de racha',PAD+36,1594);
 }
 
-function roundRect(ctx, x, y, w, h, r, fill, stroke) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
-  if (stroke) ctx.stroke();
+function render(){
+  const p=PALS[palKey],handle=document.getElementById('handleInput').value.trim();
+  ctx.clearRect(0,0,W,H);bg(p);header(p,handle,PERIODS[period]);
+  if(cardType==='artistas')drawArtistas(p,state);
+  else if(cardType==='canciones')drawCanciones(p,state);
+  else if(cardType==='minutos')drawMinutos(p,state);
+  else drawResumen(p,state);
+  footer(p);
 }
 
-// ── Actions ──
-function setCardType(type) {
-  cardType = type;
-  document.querySelectorAll('.type-tab').forEach(el => {
-    el.classList.toggle('active', el.textContent.toLowerCase().includes(
-      type === 'artistas' ? 'artist' : type === 'canciones' ? 'cancion' : type === 'minutos' ? 'minut' : 'resumen'
-    ));
-  });
-  renderCard();
-}
+function setType(t,btn){cardType=t;document.querySelectorAll('.type-btn').forEach(e=>e.classList.remove('active'));btn.classList.add('active');render();}
+function setPalette(k,el){palKey=k;document.querySelectorAll('.pal').forEach(e=>e.classList.remove('active'));el.classList.add('active');render();}
+function setPeriod(p,btn){period=p;btn.closest('.period-row').querySelectorAll('.period-btn').forEach(e=>e.classList.remove('active'));btn.classList.add('active');render();}
 
-function setStyle(style) {
-  cardStyle = style;
-  document.querySelectorAll('.style-swatch').forEach(el => el.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  renderCard();
-}
+function download(){const a=document.createElement('a');a.download=`musicstats-${cardType}-${Date.now()}.png`;a.href=C.toDataURL('image/png');a.click();toast('✓ Imagen descargada');}
+async function copyImg(){try{C.toBlob(async b=>{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);toast('✓ Copiada al portapapeles');});}catch{download();}}
+function openIG(){download();setTimeout(()=>{if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))window.location.href='instagram://story-camera';else window.open('https://www.instagram.com/','_blank');toast('📱 Sube la imagen a tu historia');},700);}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
 
-function setPeriod(p, btn) {
-  period = p;
-  btn.closest('.control-card').querySelectorAll('.type-tab').forEach(el => el.classList.remove('active'));
-  btn.classList.add('active');
-  renderCard();
-}
-
-function downloadCard() {
-  const canvas = document.getElementById('shareCanvas');
-  const link = document.createElement('a');
-  link.download = `musicstats-${cardType}-${Date.now()}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  showToast('✓ ¡Imagen descargada!');
-}
-
-async function copyImage() {
-  try {
-    const canvas = document.getElementById('shareCanvas');
-    canvas.toBlob(async blob => {
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-      showToast('✓ ¡Imagen copiada!');
-    });
-  } catch(e) {
-    downloadCard();
-  }
-}
-
-function shareInstagram() {
-  downloadCard();
-  setTimeout(() => {
-    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      window.location.href = 'instagram://story-camera';
-    } else {
-      window.open('https://www.instagram.com/', '_blank');
-    }
-    showToast('📱 Abre Instagram y sube tu historia');
-  }, 800);
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// ── Init ──
-window.addEventListener('load', () => {
-  state = loadState() || getDemoState();
-  const username = state.userName || '';
-  document.getElementById('usernameInput').value = username === 'Demo' ? '' : username;
-  renderCard();
+window.addEventListener('load',()=>{
+  state=loadState()||demo();
+  const h=state.userName&&state.userName!=='Demo'?state.userName:'';
+  document.getElementById('handleInput').value=h;
+  render();
 });
 </script>
 </body>
