@@ -237,7 +237,8 @@
 <script src="/js/personality.js"></script>
 <script>
 'use strict';
-const { computePersonality, generateProfileCode, decodeProfileCode, computeCompatibility, battleResult, PERSONALITIES, getSocialState, saveSocialState } = window.MusicPersonality;
+// These are resolved lazily after scripts load
+let computePersonality, generateProfileCode, decodeProfileCode, computeCompatibility, battleResult, PERSONALITIES, getSocialState, saveSocialState;
 
 const STATE_KEY = 'ms_state';
 let state = null;
@@ -449,6 +450,17 @@ function switchTab(tab) {
 
 // ── Init ──
 window.addEventListener('load', () => {
+  // Resolve personality module now that scripts are loaded
+  const MP = window.MusicPersonality;
+  computePersonality = MP.computePersonality;
+  generateProfileCode = MP.generateProfileCode;
+  decodeProfileCode = MP.decodeProfileCode;
+  computeCompatibility = MP.computeCompatibility;
+  battleResult = MP.battleResult;
+  PERSONALITIES = MP.PERSONALITIES;
+  getSocialState = MP.getSocialState;
+  saveSocialState = MP.saveSocialState;
+
   state = loadState() || demo();
   social = getSocialState();
 
