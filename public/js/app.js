@@ -398,12 +398,10 @@ async function renderMiniArtists() {
 
   document.getElementById('miniArtists').innerHTML = top.map((a, i) => {
     const url = artworks[i] || a.artwork;
-    const imgHtml = url
-      ? `<img src="${url}" alt="" style="width:42px;height:42px;object-fit:cover;border-radius:9px;display:block;" onerror="this.outerHTML='<span style=\"font-size:20px\">${FALLBACK_EMOJIS[i]}</span>'">`
-      : `<span style="font-size:20px">${FALLBACK_EMOJIS[i]}</span>`;
+    const imgHtml = window.artworkImg ? artworkImg(url, FALLBACK_EMOJIS[i], 42, '9px') : (url ? `<img src="${url}" alt="" style="width:42px;height:42px;object-fit:cover;border-radius:9px;">` : `<span style="font-size:20px">${FALLBACK_EMOJIS[i]}</span>`);
     return `<div class="item-row">
       <div class="rank ${rankClass(i)}">${i + 1}</div>
-      <div class="item-art" style="overflow:hidden">${imgHtml}</div>
+      <div class="item-art" style="overflow:hidden;display:flex;align-items:center;justify-content:center;">${imgHtml}</div>
       <div class="item-info">
         <div class="item-name">${esc(a.name)}</div>
         <div class="bar-wrap"><div class="bar" style="width:${Math.round(a.plays/max*100)}%"></div></div>

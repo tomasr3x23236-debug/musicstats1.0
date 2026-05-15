@@ -246,7 +246,7 @@ async function drawArtistas(p,s){
     rrect(PAD-20,y-62,W-PAD*2+40,172,18,'rgba(255,255,255,.025)');
     ctx.save();ctx.globalAlpha=.055;ctx.fillStyle=p.txt;f(210,'900');t(i+1,PAD-14,y+82);ctx.restore();
     // Artwork circle
-    if(artUrls[i]){await drawArtworkInCanvas(ctx,artUrls[i],PAD+62,y-42,120,120,14);}
+    if(artUrls[i]){await canvasArtwork(ctx,artUrls[i],PAD+62,y-42,120,120,14);}
     const artOffsetX = artUrls[i] ? PAD+200 : PAD+62;
     ctx.fillStyle=p.txt;f(i===0?62:52,i===0?'700':'500');
     const nm=a.name.length>16?a.name.slice(0,16)+'…':a.name;t(nm,artOffsetX,y+12);
@@ -269,7 +269,7 @@ async function drawCanciones(p,s){
     const bw=Math.max(50,Math.round((sg.plays/mx)*(W-PAD*2-62)));
     rrect(PAD-20,y-62,W-PAD*2+40,172,18,'rgba(255,255,255,.025)');
     ctx.save();ctx.globalAlpha=.055;ctx.fillStyle=p.txt;f(210,'900');t(i+1,PAD-14,y+82);ctx.restore();
-    if(songUrls[i]){await drawArtworkInCanvas(ctx,songUrls[i],PAD+62,y-42,120,120,14);}
+    if(songUrls[i]){await canvasArtwork(ctx,songUrls[i],PAD+62,y-42,120,120,14);}
     const songOffX=songUrls[i]?PAD+200:PAD+62;
     ctx.fillStyle=p.txt;f(i===0?58:48,i===0?'700':'500');t(short,songOffX,y+10);
     ctx.fillStyle=p.sub;f(32,'400');t(sg.artist||'',PAD+62,y+54);
@@ -342,33 +342,6 @@ function download(){const a=document.createElement('a');a.download=`musicstats-$
 async function copyImg(){try{C.toBlob(async b=>{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);toast('✓ Copiada al portapapeles');});}catch{download();}}
 function openIG(){download();setTimeout(()=>{if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))window.location.href='instagram://story-camera';else window.open('https://www.instagram.com/','_blank');toast('📱 Sube la imagen a tu historia');},700);}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
-
-// ── Artwork helper for canvas ──
-async function loadImage(url) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = url;
-  });
-}
-
-async function drawArtworkInCanvas(ctx, url, x, y, w, h, r) {
-  if (!url) return false;
-  const img = await loadImage(url);
-  if (!img) return false;
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
-  ctx.closePath(); ctx.clip();
-  ctx.drawImage(img, x, y, w, h);
-  ctx.restore();
-  return true;
-}
 
 window.addEventListener('load',()=>{
   state=loadState()||demo();
