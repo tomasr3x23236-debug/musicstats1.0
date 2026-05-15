@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>MusicStats — Mi Personalidad</title>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --dark:#090909; --card:#141414; --card2:#1c1c1c; --border:rgba(255,255,255,0.07);
+      --text1:#fff; --text2:rgba(255,255,255,.5); --text3:rgba(255,255,255,.22);
+      --surface:#1e1e1e; --pink:#FC3C44; --green:#30D158;
+    }
+    html,body{min-height:100%;}
+    body{font-family:'Inter',-apple-system,sans-serif;background:var(--dark);color:var(--text1);-webkit-font-smoothing:antialiased;}
+    .app{max-width:760px;margin:0 auto;padding:24px 20px 80px;}
+
+    /* Header */
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .logo-mark{width:36px;height:36px;background:var(--pink);border-radius:9px;display:flex;align-items:center;justify-content:center;}
+    .logo-mark svg{width:20px;height:20px;fill:#fff;}
+    .logo-name{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;color:var(--text1);}
+    .back{color:var(--text2);font-size:13px;text-decoration:none;transition:color .15s;}
+    .back:hover{color:var(--text1);}
+
+    /* Tabs */
+    .tabs{display:flex;gap:4px;background:var(--surface);border-radius:12px;padding:4px;margin-bottom:28px;}
+    .tab{flex:1;text-align:center;padding:9px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .18s;border:none;background:none;font-family:'Inter',sans-serif;}
+    .tab.active{background:var(--card);color:var(--text1);}
+    .panel{display:none;}
+    .panel.active{display:block;}
+
+    /* ── PERSONALITY PANEL ── */
+    .personality-hero{
+      border-radius:24px;padding:36px 32px;margin-bottom:20px;
+      position:relative;overflow:hidden;
+    }
+    .personality-hero::before{
+      content:'';position:absolute;inset:0;
+      background:radial-gradient(circle at 80% 20%,var(--p-color-a,.3),transparent 60%),
+                 radial-gradient(circle at 10% 80%,var(--p-color-b,.15),transparent 50%);
+      pointer-events:none;
+    }
+    .p-emoji{font-size:72px;margin-bottom:20px;display:block;line-height:1;}
+    .p-name{font-family:'Unbounded',sans-serif;font-size:32px;font-weight:900;letter-spacing:-1px;margin-bottom:12px;line-height:1.1;}
+    .p-desc{font-size:15px;color:rgba(255,255,255,.7);line-height:1.7;max-width:480px;margin-bottom:24px;}
+    .p-tags{display:flex;flex-wrap:wrap;gap:8px;}
+    .p-tag{padding:5px 14px;border-radius:50px;font-size:12px;font-weight:600;background:rgba(255,255,255,.1);border:0.5px solid rgba(255,255,255,.15);color:rgba(255,255,255,.85);}
+
+    /* Share personality btn */
+    .btn-share-p{
+      display:inline-flex;align-items:center;gap:8px;margin-top:20px;
+      background:rgba(255,255,255,.12);border:0.5px solid rgba(255,255,255,.2);
+      border-radius:50px;padding:10px 20px;font-size:13px;font-weight:600;
+      color:#fff;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
+    }
+    .btn-share-p:hover{background:rgba(255,255,255,.2);}
+
+    /* Stats row */
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+    .mini-stat{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:16px;}
+    .ms-val{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:900;letter-spacing:-1px;margin-bottom:4px;}
+    .ms-label{font-size:11px;color:var(--text2);}
+
+    /* Other personalities */
+    .section-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
+    .other-personalities{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;}
+    .other-p{
+      background:var(--card);border:0.5px solid var(--border);border-radius:14px;
+      padding:14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;
+    }
+    .other-p:hover{border-color:rgba(255,255,255,.15);}
+    .other-p.current{border-color:var(--p-accent, #FC3C44);}
+    .op-emoji{font-size:28px;flex-shrink:0;}
+    .op-name{font-size:13px;font-weight:600;margin-bottom:2px;}
+    .op-match{font-size:11px;color:var(--text2);}
+    .match-bar-wrap{margin-top:4px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;}
+    .match-bar{height:3px;border-radius:2px;}
+
+    /* ── SOCIAL PANEL ── */
+    .profile-code-card{
+      background:var(--card);border:0.5px solid var(--border);border-radius:16px;
+      padding:22px;margin-bottom:16px;
+    }
+    .code-display{
+      background:var(--surface);border:0.5px solid var(--border);border-radius:10px;
+      padding:12px 16px;font-family:'SF Mono','Fira Code',monospace;font-size:13px;
+      color:var(--pink);word-break:break-all;margin:10px 0;letter-spacing:0.5px;
+    }
+    .code-actions{display:flex;gap:8px;flex-wrap:wrap;}
+    .btn-code{
+      padding:8px 16px;border-radius:9px;font-size:12px;font-weight:600;
+      cursor:pointer;border:0.5px solid var(--border);font-family:'Inter',sans-serif;
+      transition:all .15s;display:flex;align-items:center;gap:5px;
+    }
+    .btn-primary{background:var(--pink);color:#fff;border-color:var(--pink);}
+    .btn-primary:hover{background:#FF6B73;}
+    .btn-secondary{background:var(--surface);color:var(--text2);}
+    .btn-secondary:hover{color:var(--text1);}
+
+    /* Add friend */
+    .add-friend-card{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;}
+    .input-row{display:flex;gap:8px;margin-top:10px;}
+    .friend-input{
+      flex:1;background:var(--surface);border:0.5px solid var(--border);
+      border-radius:10px;padding:10px 14px;color:var(--text1);font-size:13px;
+      outline:none;font-family:'Inter',sans-serif;transition:border-color .15s;
+    }
+    .friend-input:focus{border-color:rgba(255,255,255,.25);}
+    .friend-input::placeholder{color:var(--text3);}
+    .btn-add{padding:10px 18px;background:var(--pink);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;}
+    .btn-add:hover{background:#FF6B73;}
+
+    /* Friends list */
+    .friends-list{display:flex;flex-direction:column;gap:10px;}
+    .friend-card{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:18px;}
+    .friend-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+    .friend-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+    .friend-name{font-size:15px;font-weight:600;}
+    .friend-personality{font-size:12px;color:var(--text2);margin-top:2px;}
+    .friend-time{font-size:11px;color:var(--text3);margin-left:auto;}
+
+    /* Compatibility */
+    .compat-section{margin-bottom:14px;}
+    .compat-label{font-size:11px;color:var(--text2);margin-bottom:6px;display:flex;justify-content:space-between;}
+    .compat-bar-wrap{height:8px;background:rgba(255,255,255,.06);border-radius:4px;}
+    .compat-bar{height:8px;border-radius:4px;transition:width 1s ease;}
+    .compat-score{font-family:'Unbounded',sans-serif;font-size:22px;font-weight:900;}
+
+    /* Battle */
+    .battle-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+    .battle-cat{background:var(--surface);border-radius:10px;padding:10px;text-align:center;}
+    .battle-icon{font-size:20px;margin-bottom:4px;}
+    .battle-name{font-size:10px;color:var(--text2);margin-bottom:8px;}
+    .battle-vals{display:flex;justify-content:space-between;align-items:center;gap:4px;}
+    .battle-val{font-size:13px;font-weight:700;}
+    .battle-val.winner{color:var(--green);}
+    .battle-val.loser{color:var(--text3);}
+    .battle-vs{font-size:9px;color:var(--text3);}
+    .battle-result{
+      margin-top:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;
+      text-align:center;
+    }
+    .battle-result.win{background:rgba(48,209,88,.12);color:var(--green);}
+    .battle-result.lose{background:rgba(252,60,68,.08);color:var(--pink);}
+
+    .friend-actions{display:flex;gap:6px;margin-top:12px;}
+    .btn-remove{background:none;border:0.5px solid rgba(252,60,68,.3);color:rgba(252,60,68,.7);border-radius:8px;padding:6px 12px;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;}
+    .btn-remove:hover{background:rgba(252,60,68,.08);color:var(--pink);}
+
+    /* Empty */
+    .empty{text-align:center;padding:48px 20px;color:var(--text3);font-size:14px;}
+    .empty-icon{font-size:40px;margin-bottom:12px;}
+    .empty p{line-height:1.6;}
+
+    /* Error */
+    .error-msg{background:rgba(252,60,68,.08);border:0.5px solid rgba(252,60,68,.25);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--pink);margin-top:8px;display:none;}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#fff;color:#000;padding:11px 22px;border-radius:50px;font-size:13px;font-weight:700;transition:transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:999;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+
+    @media(max-width:520px){
+      .other-personalities{grid-template-columns:1fr;}
+      .stats-row{grid-template-columns:1fr 1fr;}
+      .battle-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <a href="/" class="logo">
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></div>
+      <div class="logo-name">MusicStats</div>
+    </a>
+    <a href="/" class="back">← Dashboard</a>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('personality')">🎭 Mi Personalidad</button>
+    <button class="tab" onclick="switchTab('social')">👥 Amigos & Battle</button>
+  </div>
+
+  <!-- PERSONALITY PANEL -->
+  <div class="panel active" id="panel-personality">
+    <div class="personality-hero" id="personalityHero">
+      <span class="p-emoji" id="pEmoji"></span>
+      <div class="p-name" id="pName"></div>
+      <div class="p-desc" id="pDesc"></div>
+      <div class="p-tags" id="pTags"></div>
+      <button class="btn-share-p" onclick="sharePersonality()">
+        📤 Compartir mi personalidad
+      </button>
+    </div>
+
+    <div class="stats-row" id="statsRow"></div>
+
+    <div class="section-title">Todas las personalidades</div>
+    <div class="other-personalities" id="otherPersonalities"></div>
+  </div>
+
+  <!-- SOCIAL PANEL -->
+  <div class="panel" id="panel-social">
+    <!-- Mi código -->
+    <div class="profile-code-card">
+      <div class="section-title" style="margin-bottom:6px">Mi código de perfil</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:2px;">Comparte este código con tus amigos para que te agreguen</div>
+      <div class="code-display" id="myCode">Generando…</div>
+      <div class="code-actions">
+        <button class="btn-code btn-primary" onclick="copyCode()">📋 Copiar código</button>
+        <button class="btn-code btn-secondary" onclick="shareCode()">📤 Compartir</button>
+      </div>
+    </div>
+
+    <!-- Agregar amigo -->
+    <div class="add-friend-card">
+      <div class="section-title" style="margin-bottom:6px">Agregar amigo</div>
+      <div style="font-size:13px;color:var(--text2);">Pega el código de perfil de tu amigo</div>
+      <div class="input-row">
+        <input class="friend-input" id="friendCodeInput" placeholder="Pega el código aquí…" />
+        <button class="btn-add" onclick="addFriend()">+ Agregar</button>
+      </div>
+      <div class="error-msg" id="addError">Código inválido. Pídele a tu amigo que copie su código correctamente.</div>
+    </div>
+
+    <!-- Friends -->
+    <div class="section-title">Mis amigos (<span id="friendCount">0</span>)</div>
+    <div class="friends-list" id="friendsList"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="/js/personality.js"></script>
+<script>
+'use strict';
+const { computePersonality, generateProfileCode, decodeProfileCode, computeCompatibility, battleResult, PERSONALITIES, getSocialState, saveSocialState } = window.MusicPersonality;
+
+const STATE_KEY = 'ms_state';
+let state = null;
+let social = null;
+
+function loadState() { try { const s=localStorage.getItem(STATE_KEY); return s?JSON.parse(s):null; } catch { return null; } }
+function demo() {
+  return {
+    userName:'Demo',totalMins:18432,totalPlays:3369,streak:47,bestStreak:62,
+    artists:[{name:'Bad Bunny',plays:847,mins:2541},{name:'Taylor Swift',plays:623,mins:1869},{name:'Drake',plays:511,mins:1533},{name:'The Weeknd',plays:489,mins:1467},{name:'Peso Pluma',plays:334,mins:1002}],
+    songs:[{title:'Tití Me Preguntó',artist:'Bad Bunny',plays:142},{title:'Cruel Summer',artist:'Taylor Swift',plays:118}],
+    genres:[{name:'Latin',pct:38},{name:'Pop',pct:24},{name:'Hip-Hop',pct:20},{name:'R&B',pct:12},{name:'Indie',pct:6}],
+  };
+}
+
+// ── Personality ──
+function renderPersonality() {
+  const p = computePersonality(state);
+  const hero = document.getElementById('personalityHero');
+  hero.style.setProperty('--p-color-a', `rgba(${p.colorRGB},.25)`);
+  hero.style.setProperty('--p-color-b', `rgba(${p.colorRGB},.12)`);
+  hero.style.background = `linear-gradient(135deg, #141414 0%, rgba(${p.colorRGB},.08) 100%)`;
+  hero.style.border = `0.5px solid rgba(${p.colorRGB},.25)`;
+
+  document.getElementById('pEmoji').textContent = p.emoji;
+  document.getElementById('pName').textContent = p.name;
+  document.getElementById('pName').style.color = p.color;
+  document.getElementById('pDesc').textContent = p.desc;
+  document.getElementById('pTags').innerHTML = p.tags.map(t=>`<span class="p-tag">${t}</span>`).join('');
+
+  // Stats
+  const hrs = Math.floor((state.totalMins||0)/60);
+  document.getElementById('statsRow').innerHTML = `
+    <div class="mini-stat">
+      <div class="ms-val" style="color:${p.color}">${(state.totalMins||0).toLocaleString()}</div>
+      <div class="ms-label">minutos escuchados</div>
+    </div>
+    <div class="mini-stat">
+      <div class="ms-val" style="color:${p.color}">${state.streak||0}🔥</div>
+      <div class="ms-label">días de racha</div>
+    </div>
+    <div class="mini-stat">
+      <div class="ms-val" style="color:${p.color}">${(state.artists||[]).length}</div>
+      <div class="ms-label">artistas únicos</div>
+    </div>`;
+
+  // Other personalities
+  document.getElementById('otherPersonalities').innerHTML = PERSONALITIES.map(op => {
+    const isCurrent = op.id === p.id;
+    const matchPct = isCurrent ? 100 : Math.floor(Math.random()*40+20);
+    return `<div class="other-p ${isCurrent?'current':''}" style="${isCurrent?`--p-accent:${op.color};border-color:${op.color}33`:''} ">
+      <span class="op-emoji">${op.emoji}</span>
+      <div style="flex:1;min-width:0">
+        <div class="op-name" ${isCurrent?`style="color:${op.color}"`:''}>${op.name}${isCurrent?' ✓':''}</div>
+        <div class="op-match">${isCurrent?'Tu personalidad actual':'Afinidad '+matchPct+'%'}</div>
+        <div class="match-bar-wrap"><div class="match-bar" style="width:${matchPct}%;background:${op.color}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function sharePersonality() {
+  const p = computePersonality(state);
+  const text = `Soy un ${p.name} ${p.emoji}\n\n"${p.desc}"\n\nDescubre tu personalidad musical en musicstats-gzwm.vercel.app`;
+  if (navigator.share) {
+    navigator.share({ title: 'Mi personalidad musical', text }).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(text).then(()=>toast('✓ Copiado al portapapeles'));
+  }
+}
+
+// ── Social ──
+function renderMyCode() {
+  const code = generateProfileCode(state);
+  document.getElementById('myCode').textContent = code;
+}
+
+function copyCode() {
+  const code = document.getElementById('myCode').textContent;
+  navigator.clipboard.writeText(code).then(()=>toast('✓ Código copiado'));
+}
+
+function shareCode() {
+  const code = document.getElementById('myCode').textContent;
+  const text = `Agrégame en MusicStats con mi código:\n${code}\n\nmusicstats-gzwm.vercel.app/social.html`;
+  if (navigator.share) navigator.share({ title: 'Mi código MusicStats', text }).catch(()=>{});
+  else { navigator.clipboard.writeText(text); toast('✓ Copiado'); }
+}
+
+function addFriend() {
+  const input = document.getElementById('friendCodeInput');
+  const errEl = document.getElementById('addError');
+  const code = input.value.trim();
+  errEl.style.display = 'none';
+
+  if (!code) return;
+  const data = decodeProfileCode(code);
+  if (!data || !data.name) {
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Check duplicate
+  if (social.friends.find(f => f.code === code)) {
+    toast('Este amigo ya está agregado');
+    return;
+  }
+
+  social.friends.push({ code, data, addedAt: Date.now() });
+  saveSocialState(social);
+  input.value = '';
+  renderFriends();
+  toast('✓ ¡' + data.name + ' agregado!');
+}
+
+function removeFriend(code) {
+  social.friends = social.friends.filter(f => f.code !== code);
+  saveSocialState(social);
+  renderFriends();
+}
+
+function renderFriends() {
+  document.getElementById('friendCount').textContent = social.friends.length;
+  const container = document.getElementById('friendsList');
+
+  if (social.friends.length === 0) {
+    container.innerHTML = `<div class="empty">
+      <div class="empty-icon">👥</div>
+      <p>Aún no tienes amigos agregados.<br>Comparte tu código y pídeles el suyo.</p>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = social.friends.map(f => {
+    const fd = f.data;
+    const fp = PERSONALITIES.find(p => p.id === fd.personalityId) || { emoji:'🎵', name:'Explorador', color:'#8E8E93', colorRGB:'142,142,147' };
+    const compat = computeCompatibility(state, fd);
+    const battle = battleResult(state, fd);
+    const compatColor = compat >= 70 ? '#30D158' : compat >= 40 ? '#FF9F0A' : '#FC3C44';
+    const compatLabel = compat >= 70 ? '¡Almas gemelas musicales!' : compat >= 40 ? 'Buen match musical' : 'Gustos muy distintos';
+    const timeAgo = formatTimeAgo(f.addedAt);
+
+    return `<div class="friend-card">
+      <div class="friend-header">
+        <div class="friend-avatar" style="background:rgba(${fp.colorRGB},.15)">${fp.emoji}</div>
+        <div>
+          <div class="friend-name">${esc(fd.name)}</div>
+          <div class="friend-personality" style="color:${fp.color}">${fp.name}</div>
+        </div>
+        <div class="friend-time">${timeAgo}</div>
+      </div>
+
+      <!-- Compatibility -->
+      <div class="compat-section">
+        <div class="compat-label">
+          <span>Compatibilidad musical</span>
+          <span class="compat-score" style="color:${compatColor}">${compat}%</span>
+        </div>
+        <div class="compat-bar-wrap">
+          <div class="compat-bar" style="width:${compat}%;background:${compatColor}"></div>
+        </div>
+        <div style="font-size:11px;color:${compatColor};margin-top:4px">${compatLabel}</div>
+      </div>
+
+      <!-- Battle -->
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Battle</div>
+      <div class="battle-grid">
+        ${battle.cats.map(cat => {
+          const iWin = cat.mine >= cat.theirs;
+          return `<div class="battle-cat">
+            <div class="battle-icon">${cat.icon}</div>
+            <div class="battle-name">${cat.name}</div>
+            <div class="battle-vals">
+              <span class="battle-val ${iWin?'winner':'loser'}">${cat.mine.toLocaleString()}${cat.unit?'<span style="font-size:9px;font-weight:400"> '+cat.unit+'</span>':''}</span>
+              <span class="battle-vs">vs</span>
+              <span class="battle-val ${!iWin?'winner':'loser'}">${cat.theirs.toLocaleString()}${cat.unit?'<span style="font-size:9px;font-weight:400"> '+cat.unit+'</span>':''}</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="battle-result ${battle.winner==='me'?'win':'lose'}">
+        ${battle.winner==='me'
+          ? `🏆 Ganas ${battle.myWins}-${battle.theirWins} contra ${esc(fd.name)}`
+          : `😤 ${esc(fd.name)} te gana ${battle.theirWins}-${battle.myWins} (por ahora)`}
+      </div>
+
+      <div class="friend-actions">
+        <button class="btn-remove" onclick="removeFriend('${f.code}')">Eliminar amigo</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Utils ──
+function esc(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function formatTimeAgo(ts) {
+  const d = Math.floor((Date.now()-ts)/86400000);
+  if (d===0) return 'Hoy'; if (d===1) return 'Ayer'; return 'Hace '+d+' días';
+}
+function toast(msg) {
+  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['personality','social'][i]===tab));
+  document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+
+// ── Init ──
+window.addEventListener('load', () => {
+  state = loadState() || demo();
+  social = getSocialState();
+
+  // Add demo friends for first-time users
+  if (social.friends.length === 0) {
+    const demoFriends = [
+      { code:'demo1', data:{ name:'Carlos', mins:12400, plays:2100, streak:23, personalityId:'fiestero', topArtist:'Bad Bunny', topArtistPlays:600, ts:Date.now()-86400000*5 }, addedAt:Date.now()-86400000*5 },
+      { code:'demo2', data:{ name:'María', mins:22800, plays:4200, streak:61, personalityId:'nocturno', topArtist:'The Weeknd', topArtistPlays:380, ts:Date.now()-86400000*2 }, addedAt:Date.now()-86400000*2 },
+    ];
+    social.friends = demoFriends;
+    saveSocialState(social);
+  }
+
+  renderPersonality();
+  renderMyCode();
+  renderFriends();
+});
+</script>
+</body>
+</html>
