@@ -234,7 +234,7 @@ function footer(p){
   ctx.fillStyle='rgba(255,255,255,.2)';f(28,'400');ct('musicstats-gzwm.vercel.app',W/2,H-68);
 }
 
-function drawArtistas(p,s){
+async function drawArtistas(p,s){
   const arts=[...s.artists].sort((a,b)=>b.plays-a.plays).slice(0,5);
   const mx=arts[0]?.plays||1;
   ctx.fillStyle=p.acc;f(28,'700');t('TOP ARTISTAS',PAD,376);
@@ -245,8 +245,11 @@ function drawArtistas(p,s){
     const y=748+i*212,bw=Math.max(50,Math.round((a.plays/mx)*(W-PAD*2-70)));
     rrect(PAD-20,y-62,W-PAD*2+40,172,18,'rgba(255,255,255,.025)');
     ctx.save();ctx.globalAlpha=.055;ctx.fillStyle=p.txt;f(210,'900');t(i+1,PAD-14,y+82);ctx.restore();
-    ctx.fillStyle=p.txt;f(i===0?66:56,i===0?'700':'500');
-    const nm=a.name.length>18?a.name.slice(0,18)+'…':a.name;t(nm,PAD+62,y+12);
+    // Artwork circle
+    if(artUrls[i]){await drawArtworkInCanvas(ctx,artUrls[i],PAD+62,y-42,120,120,14);}
+    const artOffsetX = artUrls[i] ? PAD+200 : PAD+62;
+    ctx.fillStyle=p.txt;f(i===0?62:52,i===0?'700':'500');
+    const nm=a.name.length>16?a.name.slice(0,16)+'…':a.name;t(nm,artOffsetX,y+12);
     ctx.fillStyle=p.acc;f(46,'800');rt(a.plays.toLocaleString(),W-PAD,y+12);
     ctx.fillStyle=p.sub;f(27,'400');rt('plays',W-PAD,y+54);
     rrect(PAD+62,y+32,W-PAD*2-62,6,3,'rgba(255,255,255,.08)');
@@ -254,7 +257,7 @@ function drawArtistas(p,s){
     rrect(PAD+62,y+32,bw,6,3,bg2);
   });
 }
-function drawCanciones(p,s){
+async function drawCanciones(p,s){
   const songs=[...s.songs].sort((a,b)=>b.plays-a.plays).slice(0,5);
   const mx=songs[0]?.plays||1;
   ctx.fillStyle=p.acc;f(28,'700');t('TOP CANCIONES',PAD,376);
@@ -266,7 +269,9 @@ function drawCanciones(p,s){
     const bw=Math.max(50,Math.round((sg.plays/mx)*(W-PAD*2-62)));
     rrect(PAD-20,y-62,W-PAD*2+40,172,18,'rgba(255,255,255,.025)');
     ctx.save();ctx.globalAlpha=.055;ctx.fillStyle=p.txt;f(210,'900');t(i+1,PAD-14,y+82);ctx.restore();
-    ctx.fillStyle=p.txt;f(i===0?62:52,i===0?'700':'500');t(short,PAD+62,y+10);
+    if(songUrls[i]){await drawArtworkInCanvas(ctx,songUrls[i],PAD+62,y-42,120,120,14);}
+    const songOffX=songUrls[i]?PAD+200:PAD+62;
+    ctx.fillStyle=p.txt;f(i===0?58:48,i===0?'700':'500');t(short,songOffX,y+10);
     ctx.fillStyle=p.sub;f(32,'400');t(sg.artist||'',PAD+62,y+54);
     ctx.fillStyle=p.acc;f(44,'800');rt(sg.plays+'×',W-PAD,y+10);
     rrect(PAD+62,y+72,W-PAD*2-62,5,2.5,'rgba(255,255,255,.08)');
@@ -293,7 +298,7 @@ function drawMinutos(p,s){
     ctx.fillStyle=p.sub;f(28,'400');t(st.l,cx+22,cy+140);
   });
 }
-function drawResumen(p,s){
+async function drawResumen(p,s){
   const mins=s.totalMins||0,hrs=Math.floor(mins/60);
   const topA=[...s.artists].sort((a,b)=>b.plays-a.plays)[0]||{name:'—',plays:0};
   const topS=[...s.songs].sort((a,b)=>b.plays-a.plays)[0]||{title:'—',plays:0,artist:''};
@@ -319,13 +324,13 @@ function drawResumen(p,s){
   ctx.fillStyle=p.txt;f(76,'900');t('🔥 '+(s.streak||0)+' días de racha',PAD+36,1594);
 }
 
-function render(){
+async function render(){
   const p=PALS[palKey],handle=document.getElementById('handleInput').value.trim();
   ctx.clearRect(0,0,W,H);bg(p);header(p,handle,PERIODS[period]);
-  if(cardType==='artistas')drawArtistas(p,state);
-  else if(cardType==='canciones')drawCanciones(p,state);
+  if(cardType==='artistas')await drawArtistas(p,state);
+  else if(cardType==='canciones')await drawCanciones(p,state);
   else if(cardType==='minutos')drawMinutos(p,state);
-  else drawResumen(p,state);
+  else if(cardType==='resumen') await drawResumen(p,state); else drawMinutos(p,state);
   footer(p);
 }
 
@@ -338,6 +343,33 @@ async function copyImg(){try{C.toBlob(async b=>{await navigator.clipboard.write(
 function openIG(){download();setTimeout(()=>{if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))window.location.href='instagram://story-camera';else window.open('https://www.instagram.com/','_blank');toast('📱 Sube la imagen a tu historia');},700);}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
 
+// ── Artwork helper for canvas ──
+async function loadImage(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+async function drawArtworkInCanvas(ctx, url, x, y, w, h, r) {
+  if (!url) return false;
+  const img = await loadImage(url);
+  if (!img) return false;
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath(); ctx.clip();
+  ctx.drawImage(img, x, y, w, h);
+  ctx.restore();
+  return true;
+}
+
 window.addEventListener('load',()=>{
   state=loadState()||demo();
   const h=state.userName&&state.userName!=='Demo'?state.userName:'';
@@ -345,5 +377,6 @@ window.addEventListener('load',()=>{
   render();
 });
 </script>
+<script src="/js/artwork.js"></script>
 </body>
 </html>

@@ -306,28 +306,39 @@ function manualLog() {
 // ════════════════════════════════════════════════════════════
 // RENDER
 // ════════════════════════════════════════════════════════════
-function renderAll() {
+async function renderAll() {
+  // Precargar artworks en paralelo antes de renderizar
+  if (window.ArtworkCache) {
+    await ArtworkCache.prefetch(state.artists || [], state.songs || []);
+  }
   renderNowPlaying();
   renderStats();
-  renderMiniArtists();
-  renderMiniSongs();
+  await renderMiniArtists();
+  await renderMiniSongs();
   renderGenres();
   renderHeatmap();
-  renderAllArtists();
-  renderAllSongs();
-  renderHistory();
+  await renderAllArtists();
+  await renderAllSongs();
+  await renderHistory();
   renderMonthChart();
 }
 
-function renderNowPlaying() {
+async function renderNowPlaying() {
   const el = document.getElementById('nowPlayingSection');
   if (!el) return;
   const np = state.nowPlaying;
   if (!np) { el.innerHTML = ''; return; }
 
-  const artHtml = np.artwork
-    ? `<img src="${np.artwork}" alt="artwork" />`
-    : np.emoji || '🎵';
+  // Buscar artwork real si no hay uno guardado
+  let artUrl = np.artwork;
+  if (!artUrl && window.ArtworkCache) {
+    artUrl = await ArtworkCache.getSong(np.title || np.name, np.artist)
+          || await ArtworkCache.getArtist(np.artist);
+  }
+
+  const artHtml = artUrl
+    ? `<img src="${artUrl}" alt="artwork" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" onerror="this.style.display='none'" />`
+    : `<span style="font-size:28px">${np.emoji || '🎵'}</span>`;
 
   el.innerHTML = `
     <div class="now-playing">
@@ -377,35 +388,54 @@ function renderStats() {
     </div>`;
 }
 
-function renderMiniArtists() {
+async function renderMiniArtists() {
   const top = sortedArtists().slice(0, 5);
   const max = top[0]?.plays || 1;
-  document.getElementById('miniArtists').innerHTML = top.map((a, i) => `
-    <div class="item-row">
+  // Obtener artworks
+  const artworks = window.ArtworkCache
+    ? await Promise.all(top.map(a => ArtworkCache.getArtist(a.name)))
+    : top.map(() => null);
+
+  document.getElementById('miniArtists').innerHTML = top.map((a, i) => {
+    const url = artworks[i] || a.artwork;
+    const imgHtml = url
+      ? `<img src="${url}" alt="" style="width:42px;height:42px;object-fit:cover;border-radius:9px;display:block;" onerror="this.outerHTML='<span style=\"font-size:20px\">${FALLBACK_EMOJIS[i]}</span>'">`
+      : `<span style="font-size:20px">${FALLBACK_EMOJIS[i]}</span>`;
+    return `<div class="item-row">
       <div class="rank ${rankClass(i)}">${i + 1}</div>
-      <div class="item-art">${a.artwork ? `<img src="${a.artwork}" alt="">` : FALLBACK_EMOJIS[i]}</div>
+      <div class="item-art" style="overflow:hidden">${imgHtml}</div>
       <div class="item-info">
         <div class="item-name">${esc(a.name)}</div>
         <div class="bar-wrap"><div class="bar" style="width:${Math.round(a.plays/max*100)}%"></div></div>
       </div>
       <div class="item-count">${a.plays}</div>
-    </div>`).join('') || emptyState('Aún no hay artistas registrados');
+    </div>`;
+  }).join('') || emptyState('Aún no hay artistas registrados');
 }
 
-function renderMiniSongs() {
+async function renderMiniSongs() {
   const top = sortedSongs().slice(0, 5);
   const max = top[0]?.plays || 1;
-  document.getElementById('miniSongs').innerHTML = top.map((s, i) => `
-    <div class="item-row">
+  const artworks = window.ArtworkCache
+    ? await Promise.all(top.map(s => ArtworkCache.getSong(s.title || s.name, s.artist)))
+    : top.map(() => null);
+
+  document.getElementById('miniSongs').innerHTML = top.map((s, i) => {
+    const url = artworks[i] || s.artwork;
+    const imgHtml = url
+      ? `<img src="${url}" alt="" style="width:42px;height:42px;object-fit:cover;border-radius:9px;display:block;" onerror="this.outerHTML='<span style=\"font-size:20px\">${s.emoji || '🎵'}</span>'">`
+      : `<span style="font-size:20px">${s.emoji || '🎵'}</span>`;
+    return `<div class="item-row">
       <div class="rank ${rankClass(i)}">${i + 1}</div>
-      <div class="item-art">${s.artwork ? `<img src="${s.artwork}" alt="">` : s.emoji || '🎵'}</div>
+      <div class="item-art" style="overflow:hidden">${imgHtml}</div>
       <div class="item-info">
         <div class="item-name">${esc(s.title || s.name)}</div>
         <div class="item-sub">${esc(s.artist)}</div>
         <div class="bar-wrap"><div class="bar" style="width:${Math.round(s.plays/max*100)}%"></div></div>
       </div>
       <div class="item-count">${s.plays}</div>
-    </div>`).join('') || emptyState('Aún no hay canciones registradas');
+    </div>`;
+  }).join('') || emptyState('Aún no hay canciones registradas');
 }
 
 function renderGenres() {
@@ -449,14 +479,23 @@ function renderHeatmap() {
   document.getElementById('heatmap').innerHTML = html;
 }
 
-function renderAllArtists() {
+async function renderAllArtists() {
   const artists = sortedArtists();
   const max = artists[0]?.plays || 1;
+  const artworks = window.ArtworkCache
+    ? await Promise.all(artists.slice(0,20).map(a => ArtworkCache.getArtist(a.name)))
+    : artists.map(() => null);
+
   document.getElementById('artistCount').textContent = artists.length + ' artistas';
-  document.getElementById('allArtists').innerHTML = artists.map((a, i) => `
-    <div class="item-row">
+  document.getElementById('allArtists').innerHTML = artists.map((a, i) => {
+    const url = artworks[i] || a.artwork;
+    const fb = FALLBACK_EMOJIS[i % FALLBACK_EMOJIS.length];
+    const imgHtml = url
+      ? `<img src="${url}" alt="" style="width:42px;height:42px;object-fit:cover;border-radius:9px;display:block;" onerror="this.outerHTML='<span style=\"font-size:20px\">${fb}</span>'">`
+      : `<span style="font-size:20px">${fb}</span>`;
+    return `<div class="item-row">
       <div class="rank ${rankClass(i)}">${i + 1}</div>
-      <div class="item-art">${a.artwork ? `<img src="${a.artwork}" alt="">` : FALLBACK_EMOJIS[i % FALLBACK_EMOJIS.length]}</div>
+      <div class="item-art" style="overflow:hidden">${imgHtml}</div>
       <div class="item-info">
         <div class="item-name" style="font-size:14px">${esc(a.name)}</div>
         <div class="item-sub">${a.mins} min · ${a.plays} reproducciones</div>
@@ -466,17 +505,27 @@ function renderAllArtists() {
         <div style="font-size:15px;font-weight:700">${a.plays}</div>
         <div style="font-size:10px;color:var(--text3)">plays</div>
       </div>
-    </div>`).join('') || emptyState('Aún no hay artistas');
+    </div>`;
+  }).join('') || emptyState('Aún no hay artistas');
 }
 
-function renderAllSongs() {
+async function renderAllSongs() {
   const songs = sortedSongs();
   const max = songs[0]?.plays || 1;
+  const artworks = window.ArtworkCache
+    ? await Promise.all(songs.slice(0,20).map(s => ArtworkCache.getSong(s.title || s.name, s.artist)))
+    : songs.map(() => null);
+
   document.getElementById('songCount').textContent = songs.length + ' canciones';
-  document.getElementById('allSongs').innerHTML = songs.map((s, i) => `
-    <div class="item-row">
+  document.getElementById('allSongs').innerHTML = songs.map((s, i) => {
+    const url = artworks[i] || s.artwork;
+    const fb = s.emoji || '🎵';
+    const imgHtml = url
+      ? `<img src="${url}" alt="" style="width:42px;height:42px;object-fit:cover;border-radius:9px;display:block;" onerror="this.outerHTML='<span style=\"font-size:20px\">${fb}</span>'">`
+      : `<span style="font-size:20px">${fb}</span>`;
+    return `<div class="item-row">
       <div class="rank ${rankClass(i)}">${i + 1}</div>
-      <div class="item-art">${s.artwork ? `<img src="${s.artwork}" alt="">` : s.emoji || '🎵'}</div>
+      <div class="item-art" style="overflow:hidden">${imgHtml}</div>
       <div class="item-info">
         <div class="item-name" style="font-size:14px">${esc(s.title || s.name)}</div>
         <div class="item-sub">${esc(s.artist)} · ${s.mins} min</div>
@@ -486,18 +535,28 @@ function renderAllSongs() {
         <div style="font-size:15px;font-weight:700">${s.plays}</div>
         <div style="font-size:10px;color:var(--text3)">plays</div>
       </div>
-    </div>`).join('') || emptyState('Aún no hay canciones');
+    </div>`;
+  }).join('') || emptyState('Aún no hay canciones');
 }
 
-function renderHistory() {
+async function renderHistory() {
   const hist = state.history.slice(0, 30);
   document.getElementById('totalPlaysLabel').textContent = state.totalPlays.toLocaleString() + ' reproducciones';
-  document.getElementById('historyList').innerHTML = hist.map(h => {
+  const artworks = window.ArtworkCache
+    ? await Promise.all(hist.map(h => ArtworkCache.getSong(h.title || h.name, h.artist)))
+    : hist.map(() => null);
+
+  document.getElementById('historyList').innerHTML = hist.map((h, i) => {
     const d = new Date(h.ts);
     const time = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
     const date = d.toLocaleDateString('es-MX', { weekday: 'short', month: 'short', day: 'numeric' });
+    const url = artworks[i] || h.artwork;
+    const fb = h.emoji || '🎵';
+    const imgHtml = url
+      ? `<img src="${url}" alt="" style="width:38px;height:38px;object-fit:cover;border-radius:8px;display:block;" onerror="this.outerHTML='<span style=\"font-size:18px\">${fb}</span>'">`
+      : `<span style="font-size:18px">${fb}</span>`;
     return `<div class="history-row">
-      <div class="h-art">${h.artwork ? `<img src="${h.artwork}" alt="">` : h.emoji || '🎵'}</div>
+      <div class="h-art" style="overflow:hidden">${imgHtml}</div>
       <div class="h-info">
         <div class="h-name">${esc(h.title || h.name)}</div>
         <div class="h-meta">${esc(h.artist)} · ${h.mins} min</div>
